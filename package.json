@@ -1,0 +1,28 @@
+{
+    "name": "ibacaxi-api",
+    "type": "module",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/server.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node src/server.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt": "^5.0.1",
+        "cors": "^2.8.5",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.1",
+        "pg": "^8.6.0",
+        "uuid": "^8.3.2"
+    },
+    "devDependencies": {
+        "@babel/preset-env": "^7.14.7",
+        "babel-jest": "^27.0.6",
+        "jest": "^27.0.6",
+        "nodemon": "^2.0.7"
+    }
+}
