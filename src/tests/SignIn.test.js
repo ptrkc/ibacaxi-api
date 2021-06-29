@@ -41,7 +41,6 @@ describe("POST /sign-in", () => {
             JOIN users ON sessions."userId" = users.id 
             WHERE users.email = 'bananio@bmail.com'
         `);
-        console.log(dbCheck.rows);
         expect(dbCheck.rows[0]).toEqual(
             expect.objectContaining({
                 id: expect.any(Number),
