@@ -9,8 +9,8 @@ beforeAll(async () => {
         DELETE FROM products;
     `);
     const insertProd = await db.query(`
-    insert into products (name, "categoryId", image, quantity, brief, description, price )
-    VALUES ('A Nice Product', 1, 'assets/img/nice-product.jpg',
+    insert into products (name, category, image, quantity, brief, description, price )
+    VALUES ('A Nice Product', 'Smartphone', 'assets/img/nice-product.jpg',
     10, 'Brief description', 'Bigger description', 1999) RETURNING id;
 `);
     testId = insertProd.rows[0].id;
@@ -37,7 +37,7 @@ describe("GET /product/:id", () => {
             expect.objectContaining({
                 id: expect.any(Number),
                 name: "A Nice Product",
-                categoryId: 1,
+                category: "Smartphone",
                 image: "assets/img/nice-product.jpg",
                 quantity: 10,
                 brief: "Brief description",
