@@ -4,13 +4,24 @@ export async function getProducts(req, res) {
     try {
         const { category, price } = req.query;
 
-        const categoryQuery = `AND "categoryId" = ${category}`;
+        let categoryQuery = "";
+        if(category.length > 1) {
+            categoryQuery = `AND "categoryId" = ${category[0]}`;
+            for(let i = 1; i < category.length; i++) {
+                categoryQuery += `OR "categoryId" = ${category[i]}`;
+            }
+        } else {
+            categoryQuery = `AND "categoryId" = ${category}`;
+        }
+        
         const priceQuery = (
             price === "maior" ? `ORDER BY price DESC` : `ORDER BY price`
         ); 
 
         const query = `
-            SELECT * FROM products
+            SELECT products.*, categories.name AS "categoryName"
+            FROM products JOIN categories
+            ON products."categoryId" = categories.id
             WHERE 1 = 1
             ${category ? categoryQuery : ""}
             ${price ? priceQuery : ""}
