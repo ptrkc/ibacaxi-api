@@ -33,21 +33,10 @@ export function signUpValidation(object) {
           };
 }
 
-export function newTransactionValidation(object) {
+export function integerValidation(object) {
     const schema = joi.object({
-        description: joi.string().replace(/[<>]/g, "").trim().required(),
-        value: joi.number().integer().min(1).max(999999999).required(),
-        type: joi
-            .string()
-            .pattern(/^(expense|income)$/)
-            .required(),
+        id: joi.number().integer().min(1).required(),
     });
     const error = schema.validate(object).error;
-    return error
-        ? false
-        : {
-              description: object.description.replace(/[<>]/g, "").trim(),
-              value: object.value,
-              type: object.type,
-          };
+    return error ? false : parseInt(object.id);
 }
