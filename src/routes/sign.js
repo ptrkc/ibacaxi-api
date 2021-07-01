@@ -5,11 +5,8 @@ import {
 } from "../functions/validations.js";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
-import jwt from 'jsonwebtoken';
-import dotenv from "dotenv";
-dotenv.config();
+import { checkJWT, signJWT } from "../functions/jwtokens.js";
 
-const secretKey = process.env.JWT_SECRET;
 
 export async function postSignIn(req, res) {
     try {
@@ -38,7 +35,7 @@ export async function postSignIn(req, res) {
             `INSERT INTO sessions ("userId", token) VALUES ($1, $2)`,
             [user.id, uuidToken]
         );
-        const token = jwt.sign(uuidToken, secretKey);
+        const token = signJWT(uuidToken)
         res.send({ name: user.name, token });
     } catch (e) {
         console.log(e);
@@ -47,17 +44,8 @@ export async function postSignIn(req, res) {
 }
 
 export async function postSignOut(req, res) {
-    if (!req.headers["authorization"]) {
-        res.sendStatus(401);
-        return;
-    }
-    const jwToken = req.headers["authorization"].replace("Bearer ", "");
-    let uuidToken;
-    try {
-        uuidToken = jwt.verify(jwToken, secretKey);
-    } catch {
-        return res.sendStatus(401);
-    }
+    const uuidToken = checkJWT(req.headers)
+    if (!uuidToken) return res.sendStatus(401);
     try {
         await db.query(`DELETE FROM sessions WHERE token = $1`, [uuidToken]);
         res.send();
