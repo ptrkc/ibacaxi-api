@@ -175,3 +175,37 @@ describe("PUT /cart", () => {
         expect(updateCartProduct.status).toEqual(200);
     });
 });
+
+describe("DELETE /cart", () => {
+    it("returns status 401 for empty headers", async () => {
+        const res = await supertest(app).delete("/cart");
+
+        expect(res.status).toEqual(401);
+    });
+
+    it("returns status 401 for invalid user/token", async () => {
+        const res = await supertest(app)
+            .delete("/cart")
+            .set("Authorization", `Bearer banana`);
+
+        expect(res.status).toEqual(401);
+    });
+
+    it("returns status 200 for valid params", async () => {
+        const addCartProduct = await db.query(`
+            INSERT INTO orders
+            ("userId", "productId", quantity)
+            VALUES ($1, $2, 1) RETURNING id
+        `, [userId, productId]);
+
+        const id = addCartProduct.rows[0].id;
+
+        const res = await supertest(app)
+            .delete("/cart")
+            .set("Authorization", `Bearer ${jwToken}`)
+            .query({ id: id });
+
+        expect(res.status).toEqual(200);
+    });
+});
+
