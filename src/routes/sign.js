@@ -47,13 +47,19 @@ export async function postSignIn(req, res) {
 }
 
 export async function postSignOut(req, res) {
+    if (!req.headers["authorization"]) {
+        res.sendStatus(401);
+        return;
+    }
+    const jwToken = req.headers["authorization"].replace("Bearer ", "");
+    let uuidToken;
     try {
-        if (!req.headers["authorization"]) {
-            res.sendStatus(401);
-            return;
-        }
-        const token = req.headers["authorization"].replace("Bearer ", "");
-        await db.query(`DELETE FROM sessions WHERE token = $1`, [token]);
+        uuidToken = jwt.verify(jwToken, secretKey);
+    } catch {
+        return res.sendStatus(401);
+    }
+    try {
+        await db.query(`DELETE FROM sessions WHERE token = $1`, [uuidToken]);
         res.send();
     } catch (e) {
         console.log(e);
