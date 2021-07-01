@@ -46,7 +46,6 @@ export function cartValidation(object) {
         userId: joi.number().integer().min(1).required(),
         productId: joi.number().integer().min(1).required(),
         quantity: joi.number().integer().min(1).required(),
-        closed: joi.boolean().required(),
     });
     const error = schema.validate(object).error;
     return error
@@ -55,7 +54,6 @@ export function cartValidation(object) {
             userId: object.userId,
             productId: object.productId,
             quantity: object.quantity,
-            closed: object.closed,
           };
 }
 

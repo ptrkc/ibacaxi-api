@@ -1,5 +1,5 @@
 import db from "../dbConfig.js";
-import { orderUpdateValidation } from "../functions/validations.js";
+import { cartValidation, orderUpdateValidation } from "../functions/validations.js";
 
 export async function postCart(req, res) {
     try {
@@ -21,11 +21,13 @@ export async function postCart(req, res) {
                 res.sendStatus(400);
                 return;
             }
-            const { userId, productId, quantity, closed } = validCart;
+            const { userId, productId, quantity } = validCart;
 
             const checkExistingProduct = await db.query(`
                 SELECT * FROM orders
-                WHERE "userId" = $1 AND "productId" = $2
+                WHERE "userId" = $1
+                AND "productId" = $2
+                AND closed = false
             `, [userId, productId]);
 
             const product = checkExistingProduct.rows[0];
@@ -37,7 +39,7 @@ export async function postCart(req, res) {
 
             const inventoryQuantity = checkInventory.rows[0].quantity;
 
-            if (product && product.closed === false) {
+            if (product) {
                 const newQuantity = (quantity + product.quantity); 
                 if (newQuantity > inventoryQuantity) {
                     return res.sendStatus(403);
@@ -46,7 +48,9 @@ export async function postCart(req, res) {
                 await db.query(`
                     UPDATE orders
                     SET quantity = $1
-                    WHERE "userId" = $2 AND "productId" = $3 
+                    WHERE "userId" = $2
+                    AND "productId" = $3
+                    AND closed = false 
                 `, [newQuantity, userId, productId]);
 
                 return res.sendStatus(200);
@@ -58,8 +62,8 @@ export async function postCart(req, res) {
                 await db.query(`
                     INSERT INTO orders
                     ("userId", "productId", quantity, closed)
-                    VALUES ($1, $2, $3, $4)
-                `, [userId, productId, quantity, closed]);
+                    VALUES ($1, $2, $3, false)
+                `, [userId, productId, quantity]);
 
                 return res.sendStatus(200);
             }
@@ -97,6 +101,7 @@ export async function getCart(req, res) {
                 FROM orders JOIN products
                 ON orders."productId" = products.id
                 WHERE orders."userId" = $1
+                AND closed = false
             `, [user.userId]);
 
             return res.send(cartProducts.rows);
@@ -131,14 +136,46 @@ export async function putCart(req, res) {
             }
 
             const { productId, quantity } = validOrderUpdate;
-            
-            console.log(quantity, user.userId, productId);
 
             await db.query(`
                 UPDATE orders
                 SET quantity = $1
-                WHERE "userId" = $2 AND "productId" = $3 
+                WHERE "userId" = $2
+                AND "productId" = $3
+                AND closed = false 
             `, [quantity, user.userId, productId]);
+
+            return res.sendStatus(200);
+        } else {
+            return res.sendStatus(401);
+        }
+    } catch (e) {
+        console.log(e);
+        return res.sendStatus(500);
+    }
+}
+
+export async function deleteCart(req, res) {
+    try {
+        const authorization = req.headers["authorization"];
+        const token = authorization?.replace("Bearer ", "");
+
+        if(!token) return res.sendStatus(401);
+        
+        const tokenValidation = await db.query(`
+            SELECT * FROM sessions
+            WHERE token = $1
+        `, [token]);
+
+        const user = tokenValidation.rows[0];
+        
+        if (user) {
+            const { id } = req.query;
+
+            await db.query(`
+                DELETE FROM orders
+                WHERE id = $1 
+            `, [id]);
 
             return res.sendStatus(200);
         } else {
