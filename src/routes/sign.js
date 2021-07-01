@@ -36,7 +36,7 @@ export async function postSignIn(req, res) {
             [user.id, uuidToken]
         );
         const token = signJWT(uuidToken)
-        res.send({ name: user.name, token });
+        res.send({ id: user.id, name: user.name, token });
     } catch (e) {
         console.log(e);
         res.sendStatus(500);
