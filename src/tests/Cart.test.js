@@ -1,7 +1,6 @@
 import app from "../app.js";
 import db from "../dbConfig.js";
 import supertest from "supertest";
-import jwt from 'jsonwebtoken';
 
 const uuidToken = "c26bb280-cdd5-4dfe-9f8b-59b2dada886f";
 const jwToken = "eyJhbGciOiJIUzI1NiJ9.YzI2YmIyODAtY2RkNS00ZGZlLTlmOGItNTliMmRhZGE4ODZm.K6KrU8_VsgB0Cbq7f4aiOSvsdLgp3C0eFop9BDkM7t8"
