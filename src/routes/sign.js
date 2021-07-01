@@ -5,6 +5,8 @@ import {
 } from "../functions/validations.js";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
+import { checkJWT, signJWT } from "../functions/jwtokens.js";
+
 
 export async function postSignIn(req, res) {
     try {
@@ -28,11 +30,12 @@ export async function postSignIn(req, res) {
             res.sendStatus(401);
             return;
         }
-        const token = uuid();
+        const uuidToken = uuid();
         await db.query(
             `INSERT INTO sessions ("userId", token) VALUES ($1, $2)`,
-            [user.id, token]
+            [user.id, uuidToken]
         );
+        const token = signJWT(uuidToken)
         res.send({ name: user.name, token });
     } catch (e) {
         console.log(e);
@@ -41,13 +44,10 @@ export async function postSignIn(req, res) {
 }
 
 export async function postSignOut(req, res) {
+    const uuidToken = checkJWT(req.headers)
+    if (!uuidToken) return res.sendStatus(401);
     try {
-        if (!req.headers["authorization"]) {
-            res.sendStatus(401);
-            return;
-        }
-        const token = req.headers["authorization"].replace("Bearer ", "");
-        await db.query(`DELETE FROM sessions WHERE token = $1`, [token]);
+        await db.query(`DELETE FROM sessions WHERE token = $1`, [uuidToken]);
         res.send();
     } catch (e) {
         console.log(e);
