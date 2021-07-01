@@ -1,8 +1,10 @@
 import app from "../app.js";
 import db from "../dbConfig.js";
 import supertest from "supertest";
+import jwt from 'jsonwebtoken';
 
-const token = "1446e02d-6a9c-457a-ac8c-2d012ec1064d";
+const uuidToken = "c26bb280-cdd5-4dfe-9f8b-59b2dada886f";
+const jwToken = "eyJhbGciOiJIUzI1NiJ9.YzI2YmIyODAtY2RkNS00ZGZlLTlmOGItNTliMmRhZGE4ODZm.K6KrU8_VsgB0Cbq7f4aiOSvsdLgp3C0eFop9BDkM7t8"
 let productId;
 let userId;
 
@@ -13,12 +15,12 @@ beforeAll(async () => {
         DELETE FROM users;
         DELETE FROM sessions;
         INSERT INTO users (name, email, password) 
-        VALUES ('Banânio Bananácio', 'bananio@bmail.com', '$2b$10$SprgUnx2K6H/qNpxfjShj.e4KGNdcp5XQu/mqZFinjfzVYOEzvPlG');
+        VALUES ('Banânio Bananácio', 'bananio@bmail.com', '$2b$10$KnNtpPbovIneGGG0B3FRv.PFZHtX0Xqg4G7LZIH32LzV0vBrW9UjG');
     `);
 
     const insertSession = await db.query(`
         INSERT INTO sessions ("userId", token) 
-        VALUES ((SELECT id FROM users WHERE email = 'bananio@bmail.com'),'${token}')
+        VALUES ((SELECT id FROM users WHERE email = 'bananio@bmail.com'),'${uuidToken}')
         RETURNING "userId"
     `);
     userId = insertSession.rows[0].userId;
@@ -56,19 +58,36 @@ describe("POST /cart", () => {
         const res = await supertest(app)
             .post("/cart")
             .send(body)
-            .set("Authorization", `Bearer ${token}`);
+            .set("Authorization", `Bearer ${jwToken}`);
 
         expect(res.status).toEqual(400);
     });
 
     it("returns status 403 for quantity higher than product invetory", async () => {
         const body = { userId: userId, productId: productId, quantity: 11 };
-
+       
         const res = await supertest(app)
             .post("/cart")
             .send(body)
-            .set("Authorization", `Bearer ${token}`);
+            .set("Authorization", `Bearer ${jwToken}`);
 
         expect(res.status).toEqual(403);
+    });
+
+    it("returns status 200 for valid params", async () => {
+        const body = { userId: userId, productId: productId, quantity: 1 };
+       
+        const firstTry = await supertest(app)
+            .post("/cart")
+            .send(body)
+            .set("Authorization", `Bearer ${jwToken}`)
+            .expect(200);
+
+            const secondTry = await supertest(app)
+            .post("/cart")
+            .send(body)
+            .set("Authorization", `Bearer ${jwToken}`);
+
+        expect(secondTry.status).toEqual(200);
     });
 });

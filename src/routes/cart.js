@@ -1,17 +1,16 @@
 import db from "../dbConfig.js";
 import { cartValidation, orderUpdateValidation } from "../functions/validations.js";
+import { checkJWT } from "../functions/jwtokens.js";
 
 export async function postCart(req, res) {
     try {
-        const authorization = req.headers["authorization"];
-        const token = authorization?.replace("Bearer ", "");
-
-        if(!token) return res.sendStatus(401);
+        const uuidToken = checkJWT(req.headers)
+        if (!uuidToken) return res.sendStatus(401);
         
         const tokenValidation = await db.query(`
             SELECT * FROM sessions
             WHERE token = $1
-        `, [token]);
+        `, [uuidToken]);
 
         const user = tokenValidation.rows[0];
 
@@ -78,15 +77,13 @@ export async function postCart(req, res) {
 
 export async function getCart(req, res) {
     try {
-        const authorization = req.headers["authorization"];
-        const token = authorization?.replace("Bearer ", "");
-
-        if(!token) return res.sendStatus(401);
+        const uuidToken = checkJWT(req.headers)
+        if (!uuidToken) return res.sendStatus(401);
         
         const tokenValidation = await db.query(`
             SELECT * FROM sessions
             WHERE token = $1
-        `, [token]);
+        `, [uuidToken]);
 
         const user = tokenValidation.rows[0];
         
@@ -116,15 +113,13 @@ export async function getCart(req, res) {
 
 export async function putCart(req, res) {
     try {
-        const authorization = req.headers["authorization"];
-        const token = authorization?.replace("Bearer ", "");
-
-        if(!token) return res.sendStatus(401);
+        const uuidToken = checkJWT(req.headers)
+        if (!uuidToken) return res.sendStatus(401);
         
         const tokenValidation = await db.query(`
             SELECT * FROM sessions
             WHERE token = $1
-        `, [token]);
+        `, [uuidToken]);
 
         const user = tokenValidation.rows[0];
         
@@ -157,15 +152,13 @@ export async function putCart(req, res) {
 
 export async function deleteCart(req, res) {
     try {
-        const authorization = req.headers["authorization"];
-        const token = authorization?.replace("Bearer ", "");
-
-        if(!token) return res.sendStatus(401);
+        const uuidToken = checkJWT(req.headers)
+        if (!uuidToken) return res.sendStatus(401);
         
         const tokenValidation = await db.query(`
             SELECT * FROM sessions
             WHERE token = $1
-        `, [token]);
+        `, [uuidToken]);
 
         const user = tokenValidation.rows[0];
         
