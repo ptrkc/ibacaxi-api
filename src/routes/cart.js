@@ -1,18 +1,14 @@
 import db from "../dbConfig.js";
-import { cartValidation, orderUpdateValidation } from "../functions/validations.js";
+import { cartValidation, cartUpdateValidation } from "../functions/validations.js";
 import { checkJWT } from "../functions/jwtokens.js";
+import checkUser from "../functions/checkUser.js";
 
 export async function postCart(req, res) {
     try {
         const uuidToken = checkJWT(req.headers)
         if (!uuidToken) return res.sendStatus(401);
         
-        const tokenValidation = await db.query(`
-            SELECT * FROM sessions
-            WHERE token = $1
-        `, [uuidToken]);
-
-        const user = tokenValidation.rows[0];
+        const user = await checkUser(uuidToken)
 
         if(user) {
             const validCart = cartValidation(req.body);
@@ -23,10 +19,9 @@ export async function postCart(req, res) {
             const { userId, productId, quantity } = validCart;
 
             const checkExistingProduct = await db.query(`
-                SELECT * FROM orders
+                SELECT * FROM cart
                 WHERE "userId" = $1
                 AND "productId" = $2
-                AND closed = false
             `, [userId, productId]);
 
             const product = checkExistingProduct.rows[0];
@@ -45,11 +40,10 @@ export async function postCart(req, res) {
                 }
 
                 await db.query(`
-                    UPDATE orders
+                    UPDATE cart
                     SET quantity = $1
                     WHERE "userId" = $2
                     AND "productId" = $3
-                    AND closed = false 
                 `, [newQuantity, userId, productId]);
 
                 return res.sendStatus(200);
@@ -59,9 +53,9 @@ export async function postCart(req, res) {
                 }
 
                 await db.query(`
-                    INSERT INTO orders
-                    ("userId", "productId", quantity, closed)
-                    VALUES ($1, $2, $3, false)
+                    INSERT INTO cart
+                    ("userId", "productId", quantity)
+                    VALUES ($1, $2, $3)
                 `, [userId, productId, quantity]);
 
                 return res.sendStatus(200);
@@ -80,25 +74,19 @@ export async function getCart(req, res) {
         const uuidToken = checkJWT(req.headers)
         if (!uuidToken) return res.sendStatus(401);
         
-        const tokenValidation = await db.query(`
-            SELECT * FROM sessions
-            WHERE token = $1
-        `, [uuidToken]);
-
-        const user = tokenValidation.rows[0];
+        const user = await checkUser(uuidToken)
         
         if (user) {
             const cartProducts = await db.query(`
-                SELECT orders.*,
+                SELECT cart.*,
                 products.name AS "productName",
                 products.quantity AS inventory,
                 products.price AS price,
                 products.image AS image,
                 products.brief AS brief
-                FROM orders JOIN products
-                ON orders."productId" = products.id
-                WHERE orders."userId" = $1
-                AND closed = false
+                FROM cart JOIN products
+                ON cart."productId" = products.id
+                WHERE cart."userId" = $1
             `, [user.userId]);
 
             return res.send(cartProducts.rows);
@@ -116,28 +104,22 @@ export async function putCart(req, res) {
         const uuidToken = checkJWT(req.headers)
         if (!uuidToken) return res.sendStatus(401);
         
-        const tokenValidation = await db.query(`
-            SELECT * FROM sessions
-            WHERE token = $1
-        `, [uuidToken]);
-
-        const user = tokenValidation.rows[0];
+        const user = await checkUser(uuidToken)
         
         if (user) {
-            const validOrderUpdate = orderUpdateValidation(req.body);
-            if (!validOrderUpdate) {
+            const validCartUpdate = cartUpdateValidation(req.body);
+            if (!validCartUpdate) {
                 res.sendStatus(400);
                 return;
             }
 
-            const { productId, quantity } = validOrderUpdate;
+            const { productId, quantity } = validCartUpdate;
 
             await db.query(`
-                UPDATE orders
+                UPDATE cart
                 SET quantity = $1
                 WHERE "userId" = $2
                 AND "productId" = $3
-                AND closed = false 
             `, [quantity, user.userId, productId]);
 
             return res.sendStatus(200);
@@ -155,18 +137,13 @@ export async function deleteCart(req, res) {
         const uuidToken = checkJWT(req.headers)
         if (!uuidToken) return res.sendStatus(401);
         
-        const tokenValidation = await db.query(`
-            SELECT * FROM sessions
-            WHERE token = $1
-        `, [uuidToken]);
-
-        const user = tokenValidation.rows[0];
+        const user = await checkUser(uuidToken)
         
         if (user) {
             const { id } = req.query;
 
             await db.query(`
-                DELETE FROM orders
+                DELETE FROM cart
                 WHERE id = $1 
             `, [id]);
 

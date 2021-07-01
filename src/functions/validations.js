@@ -57,7 +57,7 @@ export function cartValidation(object) {
           };
 }
 
-export function orderUpdateValidation(object) {
+export function cartUpdateValidation(object) {
     const schema = joi.object({
         productId: joi.number().integer().min(1).required(),
         quantity: joi.number().integer().min(1).required(),

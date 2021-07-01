@@ -1,7 +1,6 @@
 import app from "../app.js";
 import db from "../dbConfig.js";
 import supertest from "supertest";
-import jwt from 'jsonwebtoken';
 
 const uuidToken = "c26bb280-cdd5-4dfe-9f8b-59b2dada886f";
 const jwToken = "eyJhbGciOiJIUzI1NiJ9.YzI2YmIyODAtY2RkNS00ZGZlLTlmOGItNTliMmRhZGE4ODZm.K6KrU8_VsgB0Cbq7f4aiOSvsdLgp3C0eFop9BDkM7t8"
@@ -11,7 +10,7 @@ let userId;
 beforeAll(async () => {
     await db.query(`
         DELETE FROM products;
-        DELETE FROM orders;
+        DELETE FROM cart;
         DELETE FROM users;
         DELETE FROM sessions;
         INSERT INTO users (name, email, password) 
@@ -118,7 +117,6 @@ describe("GET /cart", () => {
                     id: expect.any(Number),
                     userId: expect.any(Number),
                     productId: expect.any(Number),
-                    closed: expect.any(Boolean),
                     productName: expect.any(String),
                     inventory: expect.any(Number),
                     price: expect.any(Number),
@@ -193,7 +191,7 @@ describe("DELETE /cart", () => {
 
     it("returns status 200 for valid params", async () => {
         const addCartProduct = await db.query(`
-            INSERT INTO orders
+            INSERT INTO cart
             ("userId", "productId", quantity)
             VALUES ($1, $2, 1) RETURNING id
         `, [userId, productId]);
