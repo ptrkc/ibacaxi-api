@@ -33,12 +33,12 @@ export async function postSignIn(req, res) {
             res.sendStatus(401);
             return;
         }
-        const sessionToken = uuid();
+        const uuidToken = uuid();
         await db.query(
             `INSERT INTO sessions ("userId", token) VALUES ($1, $2)`,
-            [user.id, sessionToken]
+            [user.id, uuidToken]
         );
-        const token = jwt.sign(sessionToken, secretKey);
+        const token = jwt.sign(uuidToken, secretKey);
         res.send({ name: user.name, token });
     } catch (e) {
         console.log(e);
