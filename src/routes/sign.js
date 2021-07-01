@@ -33,7 +33,7 @@ export async function postSignIn(req, res) {
             `INSERT INTO sessions ("userId", token) VALUES ($1, $2)`,
             [user.id, token]
         );
-        res.send({ name: user.name, token });
+        res.send({ id: user.id, name: user.name, token });
     } catch (e) {
         console.log(e);
         res.sendStatus(500);

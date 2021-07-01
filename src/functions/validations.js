@@ -40,3 +40,35 @@ export function integerValidation(object) {
     const error = schema.validate(object).error;
     return error ? false : parseInt(object.id);
 }
+
+export function cartValidation(object) {
+    const schema = joi.object({
+        userId: joi.number().integer().min(1).required(),
+        productId: joi.number().integer().min(1).required(),
+        quantity: joi.number().integer().min(1).required(),
+        closed: joi.boolean().required(),
+    });
+    const error = schema.validate(object).error;
+    return error
+        ? false
+        : {
+            userId: object.userId,
+            productId: object.productId,
+            quantity: object.quantity,
+            closed: object.closed,
+          };
+}
+
+export function orderUpdateValidation(object) {
+    const schema = joi.object({
+        productId: joi.number().integer().min(1).required(),
+        quantity: joi.number().integer().min(1).required(),
+    });
+    const error = schema.validate(object).error;
+    return error
+        ? false
+        : {
+            productId: object.productId,
+            quantity: object.quantity,
+          };
+}
