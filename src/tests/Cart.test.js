@@ -91,3 +91,41 @@ describe("POST /cart", () => {
         expect(secondTry.status).toEqual(200);
     });
 });
+
+describe("GET /cart", () => {
+    it("returns status 401 for empty headers", async () => {
+        const res = await supertest(app).get("/cart");
+
+        expect(res.status).toEqual(401);
+    });
+
+    it("returns status 401 for invalid user/token", async () => {
+        const res = await supertest(app)
+            .get("/cart")
+            .set("Authorization", `Bearer banana`);
+
+        expect(res.status).toEqual(401);
+    });
+
+    it("returns an array of objects for valid params", async () => {        
+        const res = await supertest(app)
+            .get("/cart")
+            .set("Authorization", `Bearer ${jwToken}`);
+
+        expect(res.body).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    id: expect.any(Number),
+                    userId: expect.any(Number),
+                    productId: expect.any(Number),
+                    closed: expect.any(Boolean),
+                    productName: expect.any(String),
+                    inventory: expect.any(Number),
+                    price: expect.any(Number),
+                    image: expect.any(String),
+                    brief: expect.any(String),
+                })
+            ])
+        );
+    });
+});
