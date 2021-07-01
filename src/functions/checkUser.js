@@ -1,4 +1,4 @@
-import db from "../dbConfig";
+import db from "../dbConfig.js";
 
 export default async function checkUser(uuidToken){
     const tokenValidation = await db.query(`
