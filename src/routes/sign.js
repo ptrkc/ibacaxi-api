@@ -5,6 +5,11 @@ import {
 } from "../functions/validations.js";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
+import jwt from 'jsonwebtoken';
+import dotenv from "dotenv";
+dotenv.config();
+
+const secretKey = process.env.JWT_SECRET;
 
 export async function postSignIn(req, res) {
     try {
@@ -28,11 +33,12 @@ export async function postSignIn(req, res) {
             res.sendStatus(401);
             return;
         }
-        const token = uuid();
+        const sessionToken = uuid();
         await db.query(
             `INSERT INTO sessions ("userId", token) VALUES ($1, $2)`,
-            [user.id, token]
+            [user.id, sessionToken]
         );
+        const token = jwt.sign(sessionToken, secretKey);
         res.send({ name: user.name, token });
     } catch (e) {
         console.log(e);
