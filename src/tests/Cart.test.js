@@ -129,3 +129,49 @@ describe("GET /cart", () => {
         );
     });
 });
+
+describe("PUT /cart", () => {
+    it("returns status 401 for empty headers", async () => {
+        const res = await supertest(app).put("/cart");
+
+        expect(res.status).toEqual(401);
+    });
+
+    it("returns status 401 for invalid user/token", async () => {
+        const res = await supertest(app)
+            .put("/cart")
+            .set("Authorization", `Bearer banana`);
+
+        expect(res.status).toEqual(401);
+    });
+
+    it("returns status 400 for invalid body", async () => {
+        const body = { productId: 0, quantity: 0 };
+
+        const res = await supertest(app)
+            .put("/cart")
+            .send(body)
+            .set("Authorization", `Bearer ${jwToken}`);
+
+        expect(res.status).toEqual(400);
+    });
+
+    it("returns status 200 for valid params", async () => {
+        const addCartBody = { userId: userId, productId: productId, quantity: 1 };
+
+        const addCartProduct = await supertest(app)
+            .post("/cart")
+            .send(addCartBody)
+            .set("Authorization", `Bearer ${jwToken}`)
+            .expect(200);
+
+        const updateCartBody = { productId: productId, quantity: 1 };
+
+        const updateCartProduct = await supertest(app)
+            .put("/cart")
+            .send(updateCartBody)
+            .set("Authorization", `Bearer ${jwToken}`);
+
+        expect(updateCartProduct.status).toEqual(200);
+    });
+});
