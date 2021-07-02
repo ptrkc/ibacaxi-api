@@ -2,6 +2,7 @@ import db from "../dbConfig.js";
 import { integerValidation } from "../functions/validations.js";
 import { checkJWT } from "../functions/jwtokens.js";
 import checkUser from "../functions/checkUser.js";
+import { sendMail } from "../functions/sendMail.js";
 
 export async function getOrder(req, res) {
     try {
@@ -18,13 +19,16 @@ export async function getOrder(req, res) {
         }
         const orderDetails = await db.query(
             `
-            SELECT orders.id AS "orderId", orders.date, orders.name, orders.address, orders.total, users.email 
+            SELECT orders.id AS "orderId", orders.date, users.email, orders."confirmationSent" 
             FROM orders JOIN users ON users.id = orders."userId" WHERE orders.id = $1 AND users.id = $2
         `,
             [id, user.userId]
         );
         if (orderDetails.rows.length === 0) {
             return res.sendStatus(404);
+        }
+        if (orderDetails.rows[0].confirmationSent !== true) {
+            await sendMail(orderDetails.rows[0].orderId);
         }
         return res.send(orderDetails.rows[0]);
     } catch (e) {
