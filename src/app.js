@@ -5,6 +5,8 @@ import { getProducts } from "./routes/products.js";
 import { getProduct } from "./routes/product.js";
 import { getCategories } from "./routes/categories.js";
 import { postCart, getCart, putCart, deleteCart } from "./routes/cart.js";
+import { postCheckout } from "./routes/checkout.js";
+import { getOrder } from "./routes/order.js";
 import { getSearchProducts } from "./routes/search.js";
 
 const app = express();
@@ -30,6 +32,10 @@ app.get("/cart", (req, res) => getCart(req, res));
 app.put("/cart", (req, res) => putCart(req, res));
 
 app.delete("/cart", (req, res) => deleteCart(req, res));
+
+app.post("/checkout", (req, res) => postCheckout(req, res));
+
+app.get("/order", (req, res) => getOrder(req, res));
 
 app.get("/search", (req, res) => getSearchProducts(req, res));
 
