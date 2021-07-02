@@ -77,7 +77,7 @@ export async function postCart(req, res) {
 
 export async function getCart(req, res) {
     try {
-        const uuidToken = checkJWT(req.headers)
+        const uuidToken = checkJWT(req.headers);
         if (!uuidToken) return res.sendStatus(401);
         
         const tokenValidation = await db.query(`

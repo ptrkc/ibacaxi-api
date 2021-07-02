@@ -2,9 +2,7 @@ import db from "../dbConfig.js";
 
 export async function getSearchProducts(req, res) {
     try {
-        console.log("oi")
         const { product } = req.query;
-        console.log(product);
 
         const products = await db.query(`
             SELECT * FROM products
