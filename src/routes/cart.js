@@ -89,7 +89,12 @@ export async function getCart(req, res) {
                 WHERE cart."userId" = $1
             `, [user.userId]);
 
-            return res.send(cartProducts.rows);
+            let total = 0;
+            cartProducts.rows.forEach(p => {
+                total += p.price * p.quantity
+            });
+
+            return res.send({products: cartProducts.rows, total});
         } else {
             return res.sendStatus(401);
         }
