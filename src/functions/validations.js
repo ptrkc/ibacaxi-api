@@ -51,9 +51,9 @@ export function cartValidation(object) {
     return error
         ? false
         : {
-            userId: object.userId,
-            productId: object.productId,
-            quantity: object.quantity,
+              userId: object.userId,
+              productId: object.productId,
+              quantity: object.quantity,
           };
 }
 
@@ -66,7 +66,51 @@ export function cartUpdateValidation(object) {
     return error
         ? false
         : {
-            productId: object.productId,
-            quantity: object.quantity,
+              productId: object.productId,
+              quantity: object.quantity,
           };
+}
+
+export function checkoutValidation(object) {
+    const today = new Date();
+    const currentMonth = String(today.getMonth()).padStart(2, "0");
+    const currentYear = String(today.getFullYear()).substring(2);
+    const schema = joi.object({
+        name: joi.string().trim().required(),
+        address: joi.string().trim().required(),
+        creditCard: joi
+            .string()
+            .pattern(/^\d{16}$/)
+            .required(),
+        expiration: joi
+            .string()
+            .pattern(/^\d{2}\/\d{2}$/)
+            .required(),
+        cvv: joi
+            .string()
+            .pattern(/^\d{3}$/)
+            .required(),
+        totalPrice: joi.number().integer().min(1).max(2000000000).required(),
+    });
+    const error = schema.validate(object).error;
+    if (error) {
+        return false;
+    }
+    if (parseInt(object.expiration.substring(3)) < currentYear) {
+        return false;
+    }
+    if (
+        parseInt(object.expiration.substring(3)) === currentYear &&
+        parseInt(object.expiration.substring(0, 2)) < currentMonth
+    ) {
+        return false;
+    }
+    return {
+        name: object.name.trim(),
+        address: object.address.trim(),
+        creditCard: object.creditCard,
+        expiration: object.expiration,
+        cvv: object.cvv,
+        totalPrice: parseInt(object.totalPrice),
+    };
 }
