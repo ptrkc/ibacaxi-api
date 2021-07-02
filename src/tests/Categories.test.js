@@ -3,13 +3,17 @@ import db from "../dbConfig.js";
 import supertest from "supertest";
 
 beforeAll(async () => {
-    await db.query(`
-        DELETE FROM categories;
-        INSERT INTO categories (name) VALUES ('Smartphones'), ('Tablets'), ('Mouses');
-    `);
+    const insertProd = await db.query(`
+    INSERT INTO products (name, category, image, quantity, brief, description, price )
+    VALUES ('A Nice Product', 'Smartphone', 'assets/img/nice-product.jpg',
+    10, 'Brief description', 'Bigger description', 1999);
+`);
 });
 
 afterAll(async () => {
+    await db.query(`
+        DELETE FROM products;
+    `);
     db.end();
 });
 
@@ -20,7 +24,7 @@ describe("GET /categories", () => {
         expect(res.body).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
-                    name: expect.any(String),
+                    name: "Smartphone",
                 }),
             ])
         );

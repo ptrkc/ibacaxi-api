@@ -12,7 +12,6 @@ export async function postCheckout(req, res) {
         if (!user) {
             return res.sendStatus(401);
         }
-
         const checkout = checkoutValidation(req.body);
         if (!checkout) {
             return res.sendStatus(400);
@@ -40,7 +39,7 @@ export async function postCheckout(req, res) {
             }
             updateInvetoryQuery += `UPDATE products SET quantity = ${
                 p.inventory - p.cartQuantity
-            }; `;
+            } WHERE id = ${p.productId} ; `;
             cartTotal += p.cartQuantity * p.price;
         }
         if (cartTotal !== totalPrice) {
