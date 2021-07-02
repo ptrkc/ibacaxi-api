@@ -44,7 +44,7 @@ export async function postSignIn(req, res) {
 }
 
 export async function postSignOut(req, res) {
-    const uuidToken = checkJWT(req.headers)
+    const uuidToken = checkJWT(req.headers);
     if (!uuidToken) return res.sendStatus(401);
     try {
         await db.query(`DELETE FROM sessions WHERE token = $1`, [uuidToken]);
