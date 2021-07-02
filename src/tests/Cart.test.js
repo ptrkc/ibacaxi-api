@@ -111,7 +111,7 @@ describe("GET /cart", () => {
             .get("/cart")
             .set("Authorization", `Bearer ${jwToken}`);
 
-        expect(res.body).toEqual(
+        expect(res.body.products).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({
                     id: expect.any(Number),
@@ -125,6 +125,7 @@ describe("GET /cart", () => {
                 })
             ])
         );
+        expect(res.body.total).toEqual(expect.any(Number))
     });
 });
 
