@@ -48,8 +48,8 @@ export async function postCheckout(req, res) {
         const order = await db.query(
             `
         INSERT INTO orders
-        (date , "userId" , name , address , cc , expiration , total)
-        VALUES (NOW(), $1, $2, $3, $4, $5, $6) RETURNING id
+        (date , "userId" , name , address , cc , expiration , total, "confirmationSent")
+        VALUES (NOW(), $1, $2, $3, $4, $5, $6, false) RETURNING id
         `,
             [user.userId, name, address, creditCard, expiration, totalPrice]
         );
