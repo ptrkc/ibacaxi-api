@@ -3,7 +3,8 @@ import db from "../dbConfig.js";
 import supertest from "supertest";
 
 const uuidToken = "c26bb280-cdd5-4dfe-9f8b-59b2dada886f";
-const jwToken = "eyJhbGciOiJIUzI1NiJ9.YzI2YmIyODAtY2RkNS00ZGZlLTlmOGItNTliMmRhZGE4ODZm.K6KrU8_VsgB0Cbq7f4aiOSvsdLgp3C0eFop9BDkM7t8"
+const jwToken =
+    "eyJhbGciOiJIUzI1NiJ9.YzI2YmIyODAtY2RkNS00ZGZlLTlmOGItNTliMmRhZGE4ODZm.K6KrU8_VsgB0Cbq7f4aiOSvsdLgp3C0eFop9BDkM7t8";
 let productId;
 let userId;
 
@@ -64,7 +65,7 @@ describe("POST /cart", () => {
 
     it("returns status 403 for quantity higher than product invetory", async () => {
         const body = { userId: userId, productId: productId, quantity: 11 };
-       
+
         const res = await supertest(app)
             .post("/cart")
             .send(body)
@@ -75,14 +76,14 @@ describe("POST /cart", () => {
 
     it("returns status 200 for valid params", async () => {
         const body = { userId: userId, productId: productId, quantity: 1 };
-       
+
         const firstTry = await supertest(app)
             .post("/cart")
             .send(body)
             .set("Authorization", `Bearer ${jwToken}`)
             .expect(200);
 
-            const secondTry = await supertest(app)
+        const secondTry = await supertest(app)
             .post("/cart")
             .send(body)
             .set("Authorization", `Bearer ${jwToken}`);
@@ -106,7 +107,7 @@ describe("GET /cart", () => {
         expect(res.status).toEqual(401);
     });
 
-    it("returns an array of objects for valid params", async () => {        
+    it("returns an array of objects for valid params", async () => {
         const res = await supertest(app)
             .get("/cart")
             .set("Authorization", `Bearer ${jwToken}`);
@@ -122,10 +123,10 @@ describe("GET /cart", () => {
                     price: expect.any(Number),
                     image: expect.any(String),
                     brief: expect.any(String),
-                })
+                }),
             ])
         );
-        expect(res.body.total).toEqual(expect.any(Number))
+        expect(res.body.total).toEqual(expect.any(Number));
     });
 });
 
@@ -156,7 +157,11 @@ describe("PUT /cart", () => {
     });
 
     it("returns status 200 for valid params", async () => {
-        const addCartBody = { userId: userId, productId: productId, quantity: 1 };
+        const addCartBody = {
+            userId: userId,
+            productId: productId,
+            quantity: 1,
+        };
 
         const addCartProduct = await supertest(app)
             .post("/cart")
@@ -191,11 +196,14 @@ describe("DELETE /cart", () => {
     });
 
     it("returns status 200 for valid params", async () => {
-        const addCartProduct = await db.query(`
+        const addCartProduct = await db.query(
+            `
             INSERT INTO cart
             ("userId", "productId", quantity)
             VALUES ($1, $2, 1) RETURNING id
-        `, [userId, productId]);
+        `,
+            [userId, productId]
+        );
 
         const id = addCartProduct.rows[0].id;
 
@@ -207,4 +215,3 @@ describe("DELETE /cart", () => {
         expect(res.status).toEqual(200);
     });
 });
-

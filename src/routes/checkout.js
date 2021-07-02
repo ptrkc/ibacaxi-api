@@ -76,7 +76,7 @@ export async function postCheckout(req, res) {
         );
         await db.query(`DELETE FROM cart WHERE "userId" = $1`, [user.userId]);
         await db.query(updateInvetoryQuery);
-        return res.sendStatus(200);
+        return res.send({ order: order.rows[0].id });
     } catch (e) {
         console.log(e);
         return res.sendStatus(500);
